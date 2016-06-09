@@ -3,16 +3,46 @@ security:
         # Our user class and the algorithm we'll use to encode passwords
         # http://symfony.com/doc/current/book/security.html#encoding-the-user-s-password
         AppBundle\Entity\User: bcrypt
+        #Symfony\Component\Security\Core\User\User:
+        #    algorithm: bcrypt
+        #    cost: 12
+
+    #role_hierarchy:
+    #    ROLE_ADMIN: ROLE_USER
+    #    ROLE_API: ROLE_USER
 
     providers:
         # in this example, users are stored via Doctrine in the database
         # To see the users at src/AppBundle/DataFixtures/ORM/LoadFixtures.php
         # To load users from somewhere else: http://symfony.com/doc/current/cookbook/security/custom_provider.html
-        database_users:
+        #database_users:
+        #    entity: { class: AppBundle:User, property: username }
+        our_db_provider:
             entity: { class: AppBundle:User, property: username }
+#        in_memory:
+#            memory:
+#                users:
+#                    user:
+#                        password: 123456
+#                        roles: 'ROLE_USER'
+#                    admin:
+#                        password: kitten
+#                        roles: 'ROLE_ADMIN'
+#                    ryan:
+#                        password: $2a$12$LCY0MefVIEc3TYPHV9SNnuzOfyr2p/AXIGoQJEDs4am4JwhNz/jli
+#                        roles: 'ROLE_USER'
 
     # http://symfony.com/doc/current/book/security.html#firewalls-authentication
     firewalls:
+        main:
+            anonymous: ~
+            form_login:
+                login_path: login
+                check_path: login
+            pattern: ^/
+            http_basic: ~
+            provider: our_db_provider
+            #anonymous: ~
         secured_area:
             # this firewall applies to all URLs
             pattern: ^/
