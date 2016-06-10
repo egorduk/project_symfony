@@ -149,7 +149,7 @@ class User implements UserInterface, \Serializable
         // we're using bcrypt in security.yml to encode the password, so
         // the salt value is built-in and you don't have to generate one
 
-        return null;
+        return 'salt';
     }
 
     /**
