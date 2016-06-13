@@ -2,12 +2,14 @@
 
 namespace AppBundle\Command;
 
+use AppBundle\Entity\Product;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
+use Doctrine\Common\Persistence\ObjectManager;
 
 class ImportationCommand extends ContainerAwareCommand
 {
@@ -20,18 +22,43 @@ class ImportationCommand extends ContainerAwareCommand
         'countItemProcessed' => 0,
     );
 
+    private $csvArrayData = array();
+
+    /**
+     * @var ObjectManager
+     */
+    private $entityManager;
+
     protected function configure()
     {
         $this
             ->setName('app:import')
-            ->setDescription('Importation CSV');
+            ->setDescription('Importation CSV')
+            ->addArgument(
+                'mode',
+                InputArgument::OPTIONAL,
+                'Who do you want to greet?'
+            );
+    }
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $csv = $this->parseCSV($output);
+        $this->parseCSV($output);
+
+        $mode = $input->getArgument('mode');
+        if ($mode != 'test') {
+            $this->insertIntoDb();
+        }
+
         $output->writeln("Items successful - " . $this->csvParsingOptions['countItemSuccess']);
         $output->writeln("Items processed - " . $this->csvParsingOptions['countItemProcessed']);
+        $output->writeln("Items skipped - " . $this->csvParsingOptions['countItemSkipped']);
+
     }
 
     /**
@@ -41,6 +68,7 @@ class ImportationCommand extends ContainerAwareCommand
      */
     private function parseCSV(OutputInterface $output)
     {
+        $csvFile = null;
         $ignoreFirstLine = $this->csvParsingOptions['ignoreFirstLine'];
         $finder = new Finder();
         $finder->files()
@@ -48,28 +76,79 @@ class ImportationCommand extends ContainerAwareCommand
             ->name($this->csvParsingOptions['finderName']);
 
         foreach ($finder as $file) {
-            $csv = $file;
+            $csvFile = $file;
         }
 
-        $rows = array();
-
-        if (($handle = fopen($csv->getRealPath(), "r")) !== FALSE) {
+        if (($handle = fopen($csvFile->getRealPath(), "r")) !== FALSE) {
             $i = 0;
 
-            while (($data = fgetcsv($handle, null, ";")) !== FALSE) {
+            while (($data = fgetcsv($handle)) !== FALSE) {
                 $i++;
                 if ($ignoreFirstLine && $i == 1) {
                     continue;
                 }
-                $rows[] = $data;
-                $this->csvParsingOptions['countItemSuccess']++;
-                $this->csvParsingOptions['countItemProcessed']++;
-                $this->csvParsingOptions['countItemSkipped']++;
+                $this->checkImportRules($data);
+                $this->incCountItemProcessed();
             }
 
             fclose($handle);
         }
+    }
 
-        return $rows;
+    private function checkImportRules($row) {
+        $isDiscounted = false;
+
+        if (isset($row[5])) {
+            if ($row[5] == "yes") {
+                $isDiscounted = true;
+            }
+        }
+
+        if (isset($row[3]) && isset($row[4])) {
+            if ($row[3] > 10 && $row[4] > 5 && $row[4] < 1000) {
+                if ($isDiscounted) {
+                    $row[6] = new \DateTime();
+                }
+                $this->csvArrayData[] = $row;
+                $this->incCountItemSuccess();
+                return;
+            }
+        }
+
+        $this->incCountItemSkipped();
+
+        return;
+    }
+
+    private function incCountItemSuccess() {
+        $this->csvParsingOptions['countItemSuccess']++;
+    }
+
+    private function incCountItemSkipped() {
+        $this->csvParsingOptions['countItemSkipped']++;
+    }
+
+    private function incCountItemProcessed() {
+        $this->csvParsingOptions['countItemProcessed']++;
+    }
+
+    private function insertIntoDb() {
+        foreach($this->csvArrayData as $item) {
+            $product = new Product();
+
+            $dt = new \DateTime();
+            $product->setAdded($dt);
+            $product->setCost($item[4]);
+            $product->setCode($item[0]);
+            $product->setDescription($item[2]);
+            $product->setName($item[1]);
+            $product->setStock($item[3]);
+            if (isset($item[6])) {
+                $product->setDiscontinued($item[6]);
+            }
+
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+        }
     }
 }
