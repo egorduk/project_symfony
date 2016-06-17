@@ -37,7 +37,7 @@ class ImportationCommand extends ContainerAwareCommand
             ->addArgument(
                 'mode',
                 InputArgument::OPTIONAL,
-                'Who do you want to greet?'
+                'If test mode then arg test'
             );
     }
 
@@ -48,7 +48,7 @@ class ImportationCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->parseCSV($output);
+        $this->parseCSV();
 
         $mode = $input->getArgument('mode');
         if ($mode != 'test') {
@@ -58,7 +58,6 @@ class ImportationCommand extends ContainerAwareCommand
         $output->writeln("Items successful - " . $this->csvParsingOptions['countItemSuccess']);
         $output->writeln("Items processed - " . $this->csvParsingOptions['countItemProcessed']);
         $output->writeln("Items skipped - " . $this->csvParsingOptions['countItemSkipped']);
-
     }
 
     /**
@@ -66,18 +65,18 @@ class ImportationCommand extends ContainerAwareCommand
      *
      * @return array
      */
-    private function parseCSV(OutputInterface $output)
+    private function parseCSV()
     {
         $csvFile = null;
         $ignoreFirstLine = $this->csvParsingOptions['ignoreFirstLine'];
+
         $finder = new Finder();
         $finder->files()
             ->in($this->csvParsingOptions['finderIn'])
             ->name($this->csvParsingOptions['finderName']);
-
-        foreach ($finder as $file) {
-            $csvFile = $file;
-        }
+        $iterator = $finder->getIterator();
+        $iterator->rewind();
+        $csvFile = $iterator->current();
 
         if (($handle = fopen($csvFile->getRealPath(), "r")) !== FALSE) {
             $i = 0;
@@ -87,7 +86,7 @@ class ImportationCommand extends ContainerAwareCommand
                 if ($ignoreFirstLine && $i == 1) {
                     continue;
                 }
-                $this->checkImportRules($data);
+                $this->confirmImportRules($data);
                 $this->incCountItemProcessed();
             }
 
@@ -95,7 +94,13 @@ class ImportationCommand extends ContainerAwareCommand
         }
     }
 
-    private function checkImportRules($row) {
+    /**
+     * Confirms import rules for csv row
+     *
+     * @param $row
+     */
+    private function confirmImportRules($row)
+    {
         $isDiscounted = false;
 
         if (isset($row[5])) {
@@ -120,19 +125,26 @@ class ImportationCommand extends ContainerAwareCommand
         return;
     }
 
-    private function incCountItemSuccess() {
+    private function incCountItemSuccess()
+    {
         $this->csvParsingOptions['countItemSuccess']++;
     }
 
-    private function incCountItemSkipped() {
+    private function incCountItemSkipped()
+    {
         $this->csvParsingOptions['countItemSkipped']++;
     }
 
-    private function incCountItemProcessed() {
+    private function incCountItemProcessed()
+    {
         $this->csvParsingOptions['countItemProcessed']++;
     }
 
-    private function insertIntoDb() {
+    /**
+     * Insert parsed data into database
+     */
+    private function insertIntoDb()
+    {
         foreach($this->csvArrayData as $item) {
             $product = new Product();
 
