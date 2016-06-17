@@ -1,146 +1,77 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace AppBundle\Tests\Command;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use AppBundle\Command\ImportationCommand;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Command\Command;
 
-/**
- * Functional test that implements a "smoke test" of all the public and secure
- * URLs of the application.
- * See http://symfony.com/doc/current/best_practices/tests.html#functional-tests.
- *
- * Execute the application tests using this command (requires PHPUnit to be installed):
- *
- *     $ cd your-symfony-project/
- *     $ phpunit -c app
- *
- */
-class ImportationCommandTest extends CommandTestCase
+
+class ImportationCommandTest extends WebTestCase
 {
-    private $csvParsingOptions = array(
-        'finderIn' => 'app/Resources/',
-        'finderName' => 'stock.csv',
-        'ignoreFirstLine' => true,
-        'countItemSuccess' => 0,
-        'countItemSkipped' => 0,
-        'countItemProcessed' => 0,
-    );
-
-    private $csvArrayData = array();
-
-    public function testParseCSV()
+   /* public function testCommand()
     {
-        $client = self::createClient();
-        $output = $this->runCommand($client, "app:import test'");
-        //$em = $client->getKernel()->getContainer()->get('doctrine')->getEntityManager();
-       /* $user = $em->getRepository('MyProjectBundle:User')->findOneBy(array(
-            'username' => 'alex'
-        ));*/
-        //var_dump($output);die;
-        $this->assertContains('User created', $output);
-        /*$this->assertEquals('Alexandre Salomé', $user->getFullname());
-        $this->assertEquals('alex@example.org', $user->getEmail());
-        $this->assertEquals(true, $user->getIsActive());*/
+        $kernel = $this->createKernel();
+        $kernel->boot();
 
-        $csvFile = null;
-        $ignoreFirstLine = $this->csvParsingOptions['ignoreFirstLine'];
-        $this->assertTrue($ignoreFirstLine);
+        $application = new Application($kernel);
+        $application->add(new ImportationCommand());
 
-        $finder = new Finder();
-        $finder->files()
-            ->in($this->csvParsingOptions['finderIn'])
-            ->name($this->csvParsingOptions['finderName']);
-        $iterator = $finder->getIterator();
-        $iterator->rewind();
-        $csvFile = $iterator->current();
-        $this->assertNotNull($csvFile);
+        $command = $application->find('app:import');
+        $commandTester = new CommandTester($command);
 
-        if (($handle = fopen($csvFile->getRealPath(), "r")) !== FALSE) {
-            $i = 0;
+        $commandTester->execute(
+            array(
+                'mode'  => 'test'
+            )
+        );
+        $this->assertContains('Test mode', $commandTester->getDisplay());
 
-            $this->assertNotFalse(fgetcsv($handle));
-            while (($data = fgetcsv($handle)) !== FALSE) {
-                $i++;
-                if ($ignoreFirstLine && $i == 1) {
-                    continue;
-                }
-                $this->confirmImportRules($data);
-                $this->incCountItemProcessed();
-            }
+        $commandTester->execute(
+            array(
+                'mode'  => ''
+            )
+        );
+        //$this->assertContains('Test mode', $commandTester->getDisplay(), "Not a test mode");
+    }*/
 
-            fclose($handle);
-        }
+    /**
+     * Method for testing generate command
+     */
+    public function testExecute()
+    {
+        //$this->createClient();
+        $kernel = $this->createKernel();
+        $kernel->boot();
+        $application = new Application($kernel);
+        $application->add(new ImportationCommand());
+        $command = $application->find('app:import');
+        $this->mockCommandDialogHelper($command);
+        // Test command
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(array('command' => $command->getName(), 'type' => 'service'));
+        // Some asserts...
     }
-
-    private function confirmImportRules($row)
+    /**
+     * Mocking command input (not to show command prompt)
+     * @param Command $command
+     */
+    private function mockCommandDialogHelper(Command $command)
     {
-        $isDiscounted = false;
-
-        if (isset($row[5])) {
-            if ($row[5] == "yes") {
-                $isDiscounted = true;
-            }
-        }
-
-        if (isset($row[3]) && isset($row[4])) {
-            if ($row[3] > 10 && $row[4] > 5 && $row[4] < 1000) {
-                if ($isDiscounted) {
-                    $row[6] = new \DateTime();
-                }
-                $this->csvArrayData[] = $row;
-                $this->incCountItemSuccess();
-                return;
-            }
-        }
-
-        $this->incCountItemSkipped();
-
-        return;
-    }
-
-    private function incCountItemSuccess()
-    {
-        $this->csvParsingOptions['countItemSuccess']++;
-    }
-
-    private function incCountItemSkipped()
-    {
-        $this->csvParsingOptions['countItemSkipped']++;
-    }
-
-    private function incCountItemProcessed()
-    {
-        $this->csvParsingOptions['countItemProcessed']++;
-    }
-
-    private function insertIntoDb()
-    {
-        foreach($this->csvArrayData as $item) {
-            $product = new Product();
-
-            $dt = new \DateTime();
-            $product->setAdded($dt);
-            $product->setCost($item[4]);
-            $product->setCode($item[0]);
-            $product->setDescription($item[2]);
-            $product->setName($item[1]);
-            $product->setStock($item[3]);
-            if (isset($item[6])) {
-                $product->setDiscontinued($item[6]);
-            }
-
-            $this->entityManager->persist($product);
-            $this->entityManager->flush();
-        }
+        $dialog = $this->getMock('Symfony\Component\Console\Helper\DialogHelper', array('ask'));
+        // Answers
+        $dialog->expects($this->at(0))
+            ->method('ask')
+            ->will($this->returnValue('Val1'));
+        $dialog->expects($this->at(1))
+            ->method('ask')
+            ->will($this->returnValue('Val2'));
+        $dialog->expects($this->at(2))
+            ->method('ask')
+            ->will($this->returnValue('Val3'));
+        $command->getHelperSet()->set($dialog, 'dialog');
     }
 }

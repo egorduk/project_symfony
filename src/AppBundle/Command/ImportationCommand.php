@@ -46,14 +46,16 @@ class ImportationCommand extends ContainerAwareCommand
         $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
     }
 
+    private function ask() {
+        return 'yo';
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->parseCSV();
 
         $mode = $input->getArgument('mode');
-        if ($mode != 'test') {
-            $this->insertIntoDb();
-        }
+        ($mode == 'test') ? $output->writeln("Test mode") : $this->insertIntoDb();
 
         $output->writeln("Items successful - " . $this->csvParsingOptions['countItemSuccess']);
         $output->writeln("Items processed - " . $this->csvParsingOptions['countItemProcessed']);
