@@ -15,7 +15,7 @@
     <testsuites>
         <testsuite name="Project Test Suite">
             <!--<directory>tests</directory>-->
-            <directory>../src/*Bundle/Test/*</directory>
+            <directory>../src/*Bundle/Tests/*</directory>
         </testsuite>
     </testsuites>
 
@@ -24,7 +24,7 @@
             <!--<directory>src</directory>-->
             <directory>../src/AppBundle</directory>
             <exclude>
-                <directory>../src/*Bundle/Test/*</directory>
+                <directory>../src/*Bundle/Tests/*</directory>
                 <directory>src/*/*Bundle/Resources</directory>
                 <directory>src/*/Bundle/*Bundle/Resources</directory>
             </exclude>
