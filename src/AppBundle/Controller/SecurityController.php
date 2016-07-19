@@ -11,25 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 class SecurityController extends Controller
 {
     /**
-     * @Route("/login1", name="login1")
+     * @Route("/login", name="login")
      * @Method("GET")
      */
-    public function login1Action()
-    {
-        $helper = $this->get('security.authentication_utils');
-
-        return $this->render('security/login.html.twig', array(
-            // last username entered by the user (if any)
-            'last_username' => $helper->getLastUsername(),
-            // last authentication error (if any)
-            'error' => $helper->getLastAuthenticationError(),
-        ));
-    }
-
-    /**
-     * @Route("/login", name="login")
-     */
-    public function loginAction(Request $request)
+    public function loginAction()
     {
         $authenticationUtils = $this->get('security.authentication_utils');
         // get the login error if there is one
