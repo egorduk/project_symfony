@@ -2,6 +2,7 @@
 
 namespace AppBundle\Command;
 
+use AppBundle\Validator\Constraint\CsvRowConstraint;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,6 +32,16 @@ class ImportationCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $validator = $this->getContainer()->get('csv.validator');
+        $constraint = new CsvRowConstraint();
+        $arr = [];
+        $arr[0] = 0;
+        $arr[1] = 1;
+        $arr[2] = 2;
+        $arr[3] = 11;
+        $arr[4] = 6;
+        var_dump($validator->isValid($arr, $constraint));die;
+
         $importer = $this->getContainer()->get('app.importer');
         $importer->parseCsvFile();
 

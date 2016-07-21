@@ -5,76 +5,91 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * Product
+ *
+ * @ORM\Table(name="tblProductData", uniqueConstraints={@ORM\UniqueConstraint(name="strProductCode", columns={"strProductCode"})})
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductRepository")
- * @ORM\Table(name="tblProductData")
  */
 class Product
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @var integer
+     *
      * @ORM\Column(name="intProductDataId", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
 
     /**
-     * @ORM\Column(name="strProductName", type="string", length=50)
+     * @var string
+     *
+     * @ORM\Column(name="strProductName", type="string", length=50, nullable=false)
      */
     private $name;
 
     /**
-     * @ORM\Column(name="strProductDesc", type="string", length=255)
+     * @var string
+     *
+     * @ORM\Column(name="strProductDesc", type="string", length=255, nullable=false)
      */
     private $description;
 
     /**
-     * @ORM\Column(name="strProductCode", type="string", length=10)
+     * @var string
+     *
+     * @ORM\Column(name="strProductCode", type="string", length=10, nullable=false)
      */
     private $code;
 
     /**
+     * @var \DateTime
+     *
      * @ORM\Column(name="dtmAdded", type="datetime", nullable=true)
      */
     private $added;
 
     /**
+     * @var \DateTime
+     *
      * @ORM\Column(name="dtmDiscontinued", type="datetime", nullable=true)
      */
     private $discontinued;
 
     /**
-     * @ORM\Column(name="stmTimestamp", type="timestamp", options={"default":"CURRENT_TIMESTAMP"})
-     */
-    //private $stmTimestamp;
-
-    /**
-     * @ORM\Column(name="strProductStock", type="integer")
+     * @var integer
+     *
+     * @ORM\Column(name="strProductStock", type="integer", nullable=false, options={"unsigned"=true})
      */
     private $stock;
 
     /**
-     * @ORM\Column(name="strProductCost", type="float")
+     * @var float
+     *
+     * @ORM\Column(name="strProductCost", type="float", precision=10, scale=0, nullable=false, options={"unsigned"=true})
      */
     private $cost;
 
+
+
     /**
-     * @return mixed
+     * Set name
+     *
+     * @param string $strproductname
+     *
+     * @return Product
      */
-    public function getId()
+    public function setName($strproductname)
     {
-        return $this->id;
+        $this->name = $strproductname;
+
+        return $this;
     }
 
     /**
-     * @param mixed $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return mixed
+     * Get name
+     *
+     * @return string
      */
     public function getName()
     {
@@ -82,15 +97,23 @@ class Product
     }
 
     /**
-     * @param mixed $name
+     * Set description
+     *
+     * @param string $strproductdesc
+     *
+     * @return Product
      */
-    public function setName($name)
+    public function setDescription($strproductdesc)
     {
-        $this->name = $name;
+        $this->description = $strproductdesc;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * Get description
+     *
+     * @return string
      */
     public function getDescription()
     {
@@ -98,15 +121,23 @@ class Product
     }
 
     /**
-     * @param mixed $description
+     * Set code
+     *
+     * @param string $strproductcode
+     *
+     * @return Product
      */
-    public function setDescription($description)
+    public function setCode($strproductcode)
     {
-        $this->description = $description;
+        $this->code = $strproductcode;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * Get code
+     *
+     * @return string
      */
     public function getCode()
     {
@@ -114,15 +145,23 @@ class Product
     }
 
     /**
-     * @param mixed $code
+     * Set added
+     *
+     * @param \DateTime $dtmadded
+     *
+     * @return Product
      */
-    public function setCode($code)
+    public function setAdded($dtmadded)
     {
-        $this->code = $code;
+        $this->added = $dtmadded;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * Get added
+     *
+     * @return \DateTime
      */
     public function getAdded()
     {
@@ -130,15 +169,23 @@ class Product
     }
 
     /**
-     * @param mixed $added
+     * Set discontinued
+     *
+     * @param \DateTime $dtmdiscontinued
+     *
+     * @return Product
      */
-    public function setAdded($added)
+    public function setDiscontinued($dtmdiscontinued)
     {
-        $this->added = $added;
+        $this->discontinued = $dtmdiscontinued;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * Get discontinued
+     *
+     * @return \DateTime
      */
     public function getDiscontinued()
     {
@@ -146,31 +193,23 @@ class Product
     }
 
     /**
-     * @param mixed $discontinued
+     * Set stock
+     *
+     * @param integer $strproductstock
+     *
+     * @return Product
      */
-    public function setDiscontinued($discontinued)
+    public function setStock($strproductstock)
     {
-        $this->discontinued = $discontinued;
+        $this->stock = $strproductstock;
+
+        return $this;
     }
 
     /**
-     * @return mixed
-     */
-    /*public function getStmTimestamp()
-    {
-        return $this->stmTimestamp;
-    }
-
-    /**
-     * @param mixed $stmTimestamp
-     */
-    /*public function setStmTimestamp($stmTimestamp)
-    {
-        $this->stmTimestamp = $stmTimestamp;
-    }
-
-    /**
-     * @return mixed
+     * Get stock
+     *
+     * @return integer
      */
     public function getStock()
     {
@@ -178,15 +217,23 @@ class Product
     }
 
     /**
-     * @param mixed $stock
+     * Set cost
+     *
+     * @param float $strproductcost
+     *
+     * @return Product
      */
-    public function setStock($stock)
+    public function setCost($strproductcost)
     {
-        $this->stock = $stock;
+        $this->cost = $strproductcost;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * Get cost
+     *
+     * @return float
      */
     public function getCost()
     {
@@ -194,10 +241,12 @@ class Product
     }
 
     /**
-     * @param mixed $cost
+     * Get id
+     *
+     * @return integer
      */
-    public function setCost($cost)
+    public function getId()
     {
-        $this->cost = $cost;
+        return $this->id;
     }
 }

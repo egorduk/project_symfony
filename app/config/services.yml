@@ -7,3 +7,6 @@ services:
     app.importer:
         class: AppBundle\Importer\Importer
         arguments: ["@doctrine.orm.entity_manager"]
+
+    csv.validator:
+        class: AppBundle\Validator\Constraint\CsvRowConstraintValidator

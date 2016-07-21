@@ -3,20 +3,24 @@
 namespace AppBundle\Importer;
 
 use AppBundle\Entity\Product;
+use AppBundle\Validator\Constraint\CsvRowConstraint;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Finder\Finder;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\Validator\Constraints\LessThan;
+use Symfony\Component\Validator\ValidatorBuilder;
 
 class Importer {
     private $csvParsingOptions = array(
-        'finderIn' => 'app/Resources/',
-        'finderName' => 'stock.csv',
+        'fileFolder' => 'app/Resources/',
+        'fileName' => 'stock.csv',
         'ignoreFirstLine' => true,
         'countItemSuccess' => 0,
         'countItemSkipped' => 0,
         'countItemProcessed' => 0,
         'countItemInvalid' => 0,
+        'countItemPersisted' => 0,
     );
 
     private $csvArrayData = array();
@@ -26,9 +30,12 @@ class Importer {
      */
     private $entityManager;
 
-    public function __construct(EntityManager $em)
+    private $validatorManager;
+
+    public function __construct(EntityManager $em/*, ValidatorBuilder $vb*/)
     {
         $this->entityManager = $em;
+//        $this->validatorManager = $vb;
     }
 
     /**
@@ -38,11 +45,15 @@ class Importer {
      */
     public function parseCsvFile()
     {
-        $csvFile = $this->getCsvFile();
+        $csvFile = $this->csvParsingOptions['fileFolder'] . $this->csvParsingOptions['fileName'];
+
+        if (!file_exists($csvFile)) {
+            throw new Exception("File open failed.");
+        }
 
         $ignoreFirstLine = $this->csvParsingOptions['ignoreFirstLine'];
 
-        if (($handle = fopen($csvFile->getRealPath(), "r")) !== FALSE) {
+        if (($handle = fopen($csvFile, "r")) !== FALSE) {
             $i = 0;
 
             while (($data = fgetcsv($handle)) !== FALSE) {
@@ -60,29 +71,6 @@ class Importer {
         }
     }
 
-
-    /**
-     * Opens CSV file based on $csvParsingOptions
-     *
-     * @return mixed|\Symfony\Component\Finder\SplFileInfo
-     */
-    public function getCsvFile()
-    {
-        $finder = new Finder();
-        $finder->files()
-            ->in($this->csvParsingOptions['finderIn'])
-            ->name($this->csvParsingOptions['finderName']);
-        $iterator = $finder->getIterator();
-        $iterator->rewind();
-        $csvFile = $iterator->current();
-
-        if ($csvFile === null) {
-            throw new Exception("File open failed.");
-        }
-
-        return $csvFile;
-    }
-
     /**
      * Confirms import rules for csv row
      *
@@ -98,11 +86,19 @@ class Importer {
             }
         }
 
-        if (isset($row[3]) && isset($row[4]) && $row[3] != "" && $row[4] != "") {
+        /*$csvRowConstraint = new CsvRowConstraint();
+        $res = $this->validatorManager->validateValue(
+            $row,
+            $csvRowConstraint
+        );*/
+
+
+        /*if (isset($row[3]) && isset($row[4]) && $row[3] != "" && $row[4] != "") {
             if ($row[3] > 10 && $row[4] > 5 && $row[4] < 1000) {
                 if ($isDiscounted) {
                     $row[6] = new \DateTime();
                 }
+
                 $this->csvArrayData[] = $row;
                 $this->incCountItemSuccess();
 
@@ -110,7 +106,7 @@ class Importer {
             }
         } else {
             $this->incCountItemInvalid();
-        }
+        }*/
 
         $this->incCountItemSkipped();
 
@@ -137,6 +133,16 @@ class Importer {
         $this->csvParsingOptions['countItemInvalid']++;
     }
 
+    private function incCountItemPersisted()
+    {
+        $this->csvParsingOptions['countItemPersisted']++;
+    }
+
+    private function setCountItemPersistedAsZero()
+    {
+        $this->csvParsingOptions['countItemPersisted'] = 0;
+    }
+
     public function outputImportationStatistic()
     {
         return "Items successful - " . $this->csvParsingOptions['countItemSuccess'] . PHP_EOL .
@@ -148,9 +154,10 @@ class Importer {
     /**
      * Inserts parsed data into database
      */
-    public function insertProductsIntoDb()
+    public function insertProductsIntoDb($product)
     {
-        foreach($this->csvArrayData as $item) {
+        if ($this->csvParsingOptions['countItemPersisted']) {
+        /*foreach($this->csvArrayData as $item) {
             $product = new Product();
 
             $dt = new \DateTime();
@@ -163,11 +170,13 @@ class Importer {
 
             if (isset($item[6])) {
                 $product->setDiscontinued($item[6]);
-            }
+            }*/
 
             $this->entityManager->persist($product);
+            $this->incCountItemPersisted();
+        } else {
+            $this->entityManager->flush();
+            $this->setCountItemPersistedAsZero();
         }
-
-        $this->entityManager->flush();
     }
 }
