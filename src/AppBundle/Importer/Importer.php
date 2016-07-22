@@ -2,14 +2,10 @@
 
 namespace AppBundle\Importer;
 
-use AppBundle\Entity\Product;
-use AppBundle\Validator\Constraint\CsvRowConstraint;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Finder\Finder;
 use Doctrine\Common\Persistence\ObjectManager;
-use Symfony\Component\Validator\Constraints\LessThan;
-use Symfony\Component\Validator\ValidatorBuilder;
 
 class Importer {
     private $csvParsingOptions = array(

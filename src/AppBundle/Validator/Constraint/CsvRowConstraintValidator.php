@@ -9,12 +9,6 @@ class CsvRowConstraintValidator extends ConstraintValidator
 {
     public function isValid($value, Constraint $constraint)
     {
-        /*if (!preg_match('/^[a-zA-Z0-9]+$/', $value, $matches)) {
-            $this->context->buildViolation($constraint->message)
-                ->setParameter('%string%', $value)
-                ->addViolation();
-        }*/
-
         if (isset($value[3]) && isset($value[4]) && $value[3] != "" && $value[4] != "") {
             if ($value[3] > 10 && $value[4] > 5 && $value[4] < 1000) {
                 return true;

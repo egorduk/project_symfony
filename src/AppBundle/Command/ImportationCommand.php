@@ -42,7 +42,7 @@ class ImportationCommand extends ContainerAwareCommand
         $arr[4] = 6;
         var_dump($validator->isValid($arr, $constraint));die;
 
-        $importer = $this->getContainer()->get('app.importer');
+        $importer = $this->getContainer()->get('csv.importer');
         $importer->parseCsvFile();
 
         ($this->mode == 'test') ? $output->writeln("Test mode") : $importer->insertProductsIntoDb();
