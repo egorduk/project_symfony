@@ -20,5 +20,13 @@ class CsvRowConstraintValidator extends ConstraintValidator
 
     public function validate($value, Constraint $constraint)
     {
+        //if (isset($value[3]) && isset($value[4]) && $value[3] != "" && $value[4] != "") {
+        var_dump($value);
+        //if ($value->getName() == "") {
+        if ($value == "") {
+            $this->context->buildViolation($constraint->message)
+                //->setParameter('%string%', $value)
+                ->addViolation();
+        }
     }
 }

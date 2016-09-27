@@ -3,6 +3,9 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use AppBundle\Validator\Constraint as AppAssert;
+//     * @AppAssert\CsvRowConstraint
 
 /**
  * Product
@@ -25,6 +28,8 @@ class Product
      * @var string
      *
      * @ORM\Column(name="strProductName", type="string", length=50, nullable=false)
+     *
+     * @Assert\NotBlank
      */
     private $name;
 
@@ -32,6 +37,8 @@ class Product
      * @var string
      *
      * @ORM\Column(name="strProductDesc", type="string", length=255, nullable=false)
+     *
+     * @Assert\NotBlank
      */
     private $description;
 
@@ -39,6 +46,8 @@ class Product
      * @var string
      *
      * @ORM\Column(name="strProductCode", type="string", length=10, nullable=false)
+     *
+     * @Assert\NotBlank
      */
     private $code;
 
@@ -60,6 +69,9 @@ class Product
      * @var integer
      *
      * @ORM\Column(name="strProductStock", type="integer", nullable=false, options={"unsigned"=true})
+     *
+     * @Assert\NotNull
+     * @AppAssert\CsvRowConstraint(groups={"full"})
      */
     private $stock;
 
@@ -67,6 +79,9 @@ class Product
      * @var float
      *
      * @ORM\Column(name="strProductCost", type="float", precision=10, scale=0, nullable=false, options={"unsigned"=true})
+     *
+     * @Assert\NotNull
+     * @AppAssert\CsvRowConstraint(groups={"full"})
      */
     private $cost;
 

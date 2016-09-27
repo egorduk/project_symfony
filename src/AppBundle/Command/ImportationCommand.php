@@ -2,6 +2,7 @@
 
 namespace AppBundle\Command;
 
+use AppBundle\Entity\Product;
 use AppBundle\Validator\Constraint\CsvRowConstraint;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,7 +33,7 @@ class ImportationCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $validator = $this->getContainer()->get('csv.validator');
+        /*$validator = $this->getContainer()->get('csv.validator');
         $constraint = new CsvRowConstraint();
         $arr = [];
         $arr[0] = 0;
@@ -40,7 +41,28 @@ class ImportationCommand extends ContainerAwareCommand
         $arr[2] = 2;
         $arr[3] = 11;
         $arr[4] = 6;
-        var_dump($validator->isValid($arr, $constraint));die;
+        var_dump($validator->isValid($arr, $constraint));die;*/
+
+        $constraint = new CsvRowConstraint();
+        $validator = $this->getContainer()->get('csv.validator');
+        //var_dump($validator);die;
+        $product = new Product();
+        $product->setName('test');
+        $product->setDescription('description');
+        $product->setCode('c123');
+        $product->setStock(123);
+        $product->setCost(321);
+       // var_dump($product);
+        $a = $this->getContainer()->get('validator')->validate($product, $constraint, array('full', 'Default'));
+        var_dump(count($a));die;
+        if (!$a) {
+            $output->writeln('TRUE');
+        } else {
+            $output->writeln('FALSE');
+        };
+        die;
+        var_dump($validator->validate($product, $constraint));die;
+
 
         $importer = $this->getContainer()->get('csv.importer');
         $importer->parseCsvFile();

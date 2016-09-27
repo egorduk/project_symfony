@@ -10,3 +10,5 @@ services:
 
     csv.validator:
         class: AppBundle\Validator\Constraint\CsvRowConstraintValidator
+        tags:
+            - { name: csv.validator.constraint_validator }
