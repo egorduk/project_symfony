@@ -50,19 +50,17 @@ class ImportationCommand extends ContainerAwareCommand
         $product->setName('test');
         $product->setDescription('description');
         $product->setCode('c123');
-        $product->setStock(123);
-        $product->setCost(321);
-       // var_dump($product);
-        $a = $this->getContainer()->get('validator')->validate($product, $constraint, array('full', 'Default'));
-        var_dump(count($a));die;
-        if (!$a) {
-            $output->writeln('TRUE');
+        $product->setStock(19);
+        $product->setCost(90);
+        //var_dump($product);
+        $errors = $this->getContainer()->get('validator')->validate($product, $constraint);
+        $countErrors = count($errors);
+        if (!$countErrors) {
+            echo 't';
         } else {
-            $output->writeln('FALSE');
-        };
+            echo 'f';
+        }
         die;
-        var_dump($validator->validate($product, $constraint));die;
-
 
         $importer = $this->getContainer()->get('csv.importer');
         $importer->parseCsvFile();
