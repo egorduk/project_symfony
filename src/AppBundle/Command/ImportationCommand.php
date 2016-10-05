@@ -33,35 +33,6 @@ class ImportationCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /*$validator = $this->getContainer()->get('csv.validator');
-        $constraint = new CsvRowConstraint();
-        $arr = [];
-        $arr[0] = 0;
-        $arr[1] = 1;
-        $arr[2] = 2;
-        $arr[3] = 11;
-        $arr[4] = 6;
-        var_dump($validator->isValid($arr, $constraint));die;*/
-
-        $constraint = new CsvRowConstraint();
-        $validator = $this->getContainer()->get('csv.validator');
-        //var_dump($validator);die;
-        $product = new Product();
-        $product->setName('test');
-        $product->setDescription('description');
-        $product->setCode('c123');
-        $product->setStock(19);
-        $product->setCost(90);
-        //var_dump($product);
-        $errors = $this->getContainer()->get('validator')->validate($product, $constraint);
-        $countErrors = count($errors);
-        if (!$countErrors) {
-            echo 't';
-        } else {
-            echo 'f';
-        }
-        die;
-
         $importer = $this->getContainer()->get('csv.importer');
         $importer->parseCsvFile();
 

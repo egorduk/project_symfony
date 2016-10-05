@@ -6,9 +6,8 @@ parameters:
 services:
     csv.importer:
         class: AppBundle\Importer\Importer
-        arguments: ["@doctrine.orm.entity_manager"]
+        arguments: ["@doctrine.orm.entity_manager", "@service_container"]
 
-    csv.validator:
-        class: AppBundle\Validator\Constraint\CsvRowConstraintValidator
-        tags:
-            - { name: csv.validator.constraint_validator }
+    csv.helper:
+        class: AppBundle\Service\Helper\Helper
+        arguments: ["@service_container"]

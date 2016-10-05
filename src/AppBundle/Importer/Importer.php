@@ -4,7 +4,8 @@ namespace AppBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+//use Symfony\Component\Finder\Finder;
 use Doctrine\Common\Persistence\ObjectManager;
 
 class Importer {
@@ -20,18 +21,18 @@ class Importer {
     );
 
     private $csvArrayData = array();
+    private $productsArr = array();
+    private $container;
 
     /**
      * @var ObjectManager
      */
     private $entityManager;
 
-    private $validatorManager;
-
-    public function __construct(EntityManager $em/*, ValidatorBuilder $vb*/)
+    public function __construct(EntityManager $em, Container $container)
     {
         $this->entityManager = $em;
-//        $this->validatorManager = $vb;
+        $this->container = $container;
     }
 
     /**
@@ -65,6 +66,8 @@ class Importer {
 
             fclose($handle);
         }
+
+       // var_dump($this->productsArr);die;
     }
 
     /**
@@ -72,23 +75,8 @@ class Importer {
      *
      * @param $row
      */
-    private function confirmImportRules($row)
+    private function confirmImportRules($rowData)
     {
-        $isDiscounted = false;
-
-        if (isset($row[5])) {
-            if ($row[5] == "yes") {
-                $isDiscounted = true;
-            }
-        }
-
-        /*$csvRowConstraint = new CsvRowConstraint();
-        $res = $this->validatorManager->validateValue(
-            $row,
-            $csvRowConstraint
-        );*/
-
-
         /*if (isset($row[3]) && isset($row[4]) && $row[3] != "" && $row[4] != "") {
             if ($row[3] > 10 && $row[4] > 5 && $row[4] < 1000) {
                 if ($isDiscounted) {
@@ -103,6 +91,14 @@ class Importer {
         } else {
             $this->incCountItemInvalid();
         }*/
+
+        $helper = $this->container->get('csv.helper');
+        $product = $helper->getProductEntityFromCsvRow($rowData);
+
+        if ($product != null) {
+            $this->productsArr[] = $product;
+        }
+
 
         $this->incCountItemSkipped();
 
@@ -150,29 +146,30 @@ class Importer {
     /**
      * Inserts parsed data into database
      */
-    public function insertProductsIntoDb($product)
+    public function insertProductsIntoDb()
     {
-        if ($this->csvParsingOptions['countItemPersisted']) {
-        /*foreach($this->csvArrayData as $item) {
-            $product = new Product();
+        //$this->entityManager->persist($this->productsArr);
+        //if ($this->csvParsingOptions['countItemPersisted']) {
 
-            $dt = new \DateTime();
-            $product->setAdded($dt);
-            $product->setCost($item[4]);
-            $product->setCode($item[0]);
-            $product->setDescription($item[2]);
-            $product->setName($item[1]);
-            $product->setStock($item[3]);
 
-            if (isset($item[6])) {
-                $product->setDiscontinued($item[6]);
-            }*/
-
+        foreach($this->productsArr as $index => $product) {
             $this->entityManager->persist($product);
             $this->incCountItemPersisted();
-        } else {
+
+            $ind = $index + 1;
+
+            if ($ind % 5 == 0) {
+                $this->entityManager->flush();
+            }
+        }
+
+        if ($this->entityManager->getUnitOfWork()->getScheduledEntityInsertions()) {
+
+        };
+
+         /*else {
             $this->entityManager->flush();
             $this->setCountItemPersistedAsZero();
-        }
+        }*/
     }
 }

@@ -70,7 +70,6 @@ class Product
      *
      * @ORM\Column(name="strProductStock", type="integer", nullable=false, options={"unsigned"=true})
      *
-     * @Assert\NotNull
      * @AppAssert\CsvRowConstraint
      */
     private $stock;
@@ -80,7 +79,6 @@ class Product
      *
      * @ORM\Column(name="strProductCost", type="float", precision=10, scale=0, nullable=false, options={"unsigned"=true})
      *
-     * @Assert\NotNull
      * @AppAssert\CsvRowConstraint
      */
     private $cost;
