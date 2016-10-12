@@ -2,8 +2,6 @@
 
 namespace AppBundle\Command;
 
-use AppBundle\Entity\Product;
-use AppBundle\Validator\Constraint\CsvRowConstraint;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ImportationCommand extends ContainerAwareCommand
 {
-    protected $mode;
+    protected $mode = '';
 
     protected function configure()
     {
@@ -33,10 +31,14 @@ class ImportationCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $importer = $this->getContainer()->get('csv.importer');
-        $importer->parseCsvFile();
+        $currentMode = $this->mode;
 
-        ($this->mode == 'test') ? $output->writeln("Test mode") : $importer->insertProductsIntoDb();
+        $importer = $this->getContainer()->get('csv.importer');
+        $importer->parseCsvFile($currentMode);
+
+        if ($currentMode == 'test') {
+            $output->writeln('Test mode');
+        }
 
         $outputStatistic = $importer->outputImportationStatistic();
         $output->writeln($outputStatistic);

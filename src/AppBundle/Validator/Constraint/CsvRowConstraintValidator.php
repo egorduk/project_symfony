@@ -9,7 +9,7 @@ class CsvRowConstraintValidator extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint)
     {
-        if ( !(($value->getCost() > 5 && $value->getCost() < 1000) && $value->getStock() > 10) ) {
+        if ( !(($value->getCost() > $constraint->minCost && $value->getCost() < $constraint->maxCost) && $value->getStock() > $constraint->minStock) ) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
         }

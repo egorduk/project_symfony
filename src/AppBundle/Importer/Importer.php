@@ -20,9 +20,9 @@ class Importer {
         'countItemCodeDuplicate' => 0
     );
 
-    private $productsArr = array();
+    private $currentMode = '';
 
-    private $productCodesArr = array();
+    private $productCodesArr = [];
 
     /**
      * @var Container
@@ -45,17 +45,19 @@ class Importer {
      *
      * @return array
      */
-    public function parseCsvFile()
+    public function parseCsvFile($currentMode)
     {
+        $this->currentMode = $currentMode;
+
         $csvFile = $this->csvParsingOptions['fileFolder'] . $this->csvParsingOptions['fileName'];
 
         if (!file_exists($csvFile)) {
-            throw new Exception("File open failed.");
+            throw new Exception('File open failed.');
         }
 
         $ignoreFirstLine = $this->csvParsingOptions['ignoreFirstLine'];
 
-        if (($handle = fopen($csvFile, "r")) !== FALSE) {
+        if (($handle = fopen($csvFile, 'r')) !== FALSE) {
             $i = 0;
 
             while (($data = fgetcsv($handle)) !== FALSE) {
@@ -90,7 +92,10 @@ class Importer {
             $productCode = $product->getCode();
 
             if ( (isset($this->productCodesArr[$productCode]) && $this->productCodesArr[$productCode]) != $productCode ) {
-                $this->productsArr[] = $product;
+                if ($this->currentMode != 'test') {
+                    $this->insertProductIntoDb($product);
+                }
+
                 $this->productCodesArr[$productCode] = $productCode;
 
                 $this->incCountItemSuccess();
@@ -131,33 +136,21 @@ class Importer {
 
     public function outputImportationStatistic()
     {
-        return "Items successful - " . $this->csvParsingOptions['countItemSuccess'] . PHP_EOL .
-        "Items processed - " . $this->csvParsingOptions['countItemProcessed'] . PHP_EOL .
-        "Items inserted into database - " . $this->csvParsingOptions['countItemPersisted'] . PHP_EOL .
-        "Items code duplicate - " . $this->csvParsingOptions['countItemCodeDuplicate'] . PHP_EOL .
-        "Items have invalid format - " . $this->csvParsingOptions['countItemInvalid'];
+        return 'Items successful - ' . $this->csvParsingOptions['countItemSuccess'] . PHP_EOL .
+        'Items processed - ' . $this->csvParsingOptions['countItemProcessed'] . PHP_EOL .
+        'Items inserted into database - ' . $this->csvParsingOptions['countItemPersisted'] . PHP_EOL .
+        'Items code duplicate - ' . $this->csvParsingOptions['countItemCodeDuplicate'] . PHP_EOL .
+        'Items have invalid format - ' . $this->csvParsingOptions['countItemInvalid'];
     }
 
     /**
-     * Inserts all products into database
+     * Inserts single product into database
      */
-    public function insertProductsIntoDb()
+    public function insertProductIntoDb($product)
     {
-        foreach($this->productsArr as $index => $product) {
-            $this->entityManager->persist($product);
-            $this->incCountItemPersisted();
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
 
-            $ind = $index + 1;
-
-            if ($ind % 10 == 0) {
-                $this->entityManager->flush();
-            }
-        }
-
-        $countRemainingPersistedEntities = count($this->entityManager->getUnitOfWork()->getScheduledEntityInsertions());
-
-        if ($countRemainingPersistedEntities) {
-            $this->entityManager->flush();
-        };
+        $this->incCountItemPersisted();
     }
 }

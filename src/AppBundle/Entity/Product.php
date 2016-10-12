@@ -11,6 +11,12 @@ use AppBundle\Validator\Constraint as AppAssert;
  *
  * @ORM\Table(name="tblProductData", uniqueConstraints={@ORM\UniqueConstraint(name="strProductCode", columns={"strProductCode"})})
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductRepository")
+ *
+ * @AppAssert\CsvRowConstraint(
+ *     minStock = 10,
+ *     maxCost = 1000,
+ *     minCost = 5
+ * )
  */
 class Product
 {
@@ -69,7 +75,6 @@ class Product
      *
      * @ORM\Column(name="strProductStock", type="integer", nullable=false, options={"unsigned"=true})
      *
-     * @AppAssert\CsvRowConstraint
      */
     private $stock;
 
@@ -78,7 +83,6 @@ class Product
      *
      * @ORM\Column(name="strProductCost", type="float", precision=10, scale=0, nullable=false, options={"unsigned"=true})
      *
-     * @AppAssert\CsvRowConstraint
      */
     private $cost;
 
@@ -87,13 +91,13 @@ class Product
     /**
      * Set name
      *
-     * @param string $strproductname
+     * @param string $productName
      *
      * @return Product
      */
-    public function setName($strproductname)
+    public function setName($productName)
     {
-        $this->name = $strproductname;
+        $this->name = $productName;
 
         return $this;
     }
@@ -111,13 +115,13 @@ class Product
     /**
      * Set description
      *
-     * @param string $strproductdesc
+     * @param string $productDesc
      *
      * @return Product
      */
-    public function setDescription($strproductdesc)
+    public function setDescription($productDesc)
     {
-        $this->description = $strproductdesc;
+        $this->description = $productDesc;
 
         return $this;
     }
@@ -135,13 +139,13 @@ class Product
     /**
      * Set code
      *
-     * @param string $strproductcode
+     * @param string $productCode
      *
      * @return Product
      */
-    public function setCode($strproductcode)
+    public function setCode($productCode)
     {
-        $this->code = $strproductcode;
+        $this->code = $productCode;
 
         return $this;
     }
@@ -159,13 +163,13 @@ class Product
     /**
      * Set added
      *
-     * @param \DateTime $dtmadded
+     * @param \DateTime $productAdded
      *
      * @return Product
      */
-    public function setAdded($dtmadded)
+    public function setAdded($productAdded)
     {
-        $this->added = $dtmadded;
+        $this->added = $productAdded;
 
         return $this;
     }
@@ -183,13 +187,13 @@ class Product
     /**
      * Set discontinued
      *
-     * @param \DateTime $dtmdiscontinued
+     * @param \DateTime $productDiscontinued
      *
      * @return Product
      */
-    public function setDiscontinued($dtmdiscontinued)
+    public function setDiscontinued($productDiscontinued)
     {
-        $this->discontinued = $dtmdiscontinued;
+        $this->discontinued = $productDiscontinued;
 
         return $this;
     }
@@ -207,13 +211,13 @@ class Product
     /**
      * Set stock
      *
-     * @param integer $strproductstock
+     * @param integer $productStock
      *
      * @return Product
      */
-    public function setStock($strproductstock)
+    public function setStock($productStock)
     {
-        $this->stock = $strproductstock;
+        $this->stock = $productStock;
 
         return $this;
     }
@@ -231,13 +235,13 @@ class Product
     /**
      * Set cost
      *
-     * @param float $strproductcost
+     * @param float $productCost
      *
      * @return Product
      */
-    public function setCost($strproductcost)
+    public function setCost($productCost)
     {
-        $this->cost = $strproductcost;
+        $this->cost = $productCost;
 
         return $this;
     }
