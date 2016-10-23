@@ -11,6 +11,7 @@ P0009,Harddisk,Great for storing data,0,99.99,
 P0010,CD Bundle,Lots of fun,0,10,
 P0011,Misc Cables,error in export
 P0012,TV,HD ready,45,50.55,
+P0012,TV1,HD ready1,45,50.55,
 P0013,Cd Player,Beats MP3,34,27.99,
 P0014,VCR,VHS rules,3,23,yes
 P0015,Bluray Player,Excellent picture,32,$4.33,
@@ -20,6 +21,7 @@ P0017,CPU,Processing power, ideal for multimedia,4,4.22,
 P0018,Harddisk,More storage options,34,50,yes
 P0019,CD Bundle,Store all your data. Very convenient,23,3.44,
 P0020,Cd Player,Play CD's,56,30,
+P0020,Cd Player1,Play CD's1,56,30,
 P0021,VCR,Watch all those retro videos,12,3.55,yes
 P0022,Bluray Player,The future of home entertainment!,45,3,
 P0023,XBOX360,Amazing,23,50,

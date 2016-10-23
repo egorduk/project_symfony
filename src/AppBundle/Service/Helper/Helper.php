@@ -4,17 +4,16 @@ namespace AppBundle\Service\Helper;
 
 use AppBundle\Entity\Product;
 use AppBundle\Validator\Constraint\CsvRowConstraint;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Helper
 {
-    private $container;
-    private $constraint;
+    private $validator;
 
-    public function __construct(Container $container)
+    public function __construct(ValidatorInterface $validator)
     {
-        $this->container = $container;
-        $this->constraint = new CsvRowConstraint();
+        $this->validator = $validator;
     }
 
     /**
@@ -41,10 +40,10 @@ class Helper
         $cost = isset($rowData[4]) ? $rowData[4] : 0;
         $product->setCost($cost);
 
-        $discount = isset($rowData[5]) && ($rowData[5] == "yes") ? new \DateTime() : null;
+        $discount = isset($rowData[5]) && ($rowData[5] == 'yes') ? new \DateTime() : null;
         $product->setDiscontinued($discount);
 
-        $errors = $this->container->get('validator')->validate($product, $this->constraint);
+        $errors = $this->validator->validate($product);
         $countErrors = count($errors);
 
         return (!$countErrors) ? $product : null;

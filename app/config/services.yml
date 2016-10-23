@@ -10,4 +10,4 @@ services:
 
     csv.helper:
         class: AppBundle\Service\Helper\Helper
-        arguments: ["@service_container"]
+        arguments: ["@validator"]
