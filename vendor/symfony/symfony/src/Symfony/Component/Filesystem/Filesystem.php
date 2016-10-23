@@ -283,7 +283,9 @@ class Filesystem
     /**
      * Tells whether a file exists and is readable.
      *
-     * @param string $filename Path to the file.
+     * @param string $filename Path to the file
+     *
+     * @return bool
      *
      * @throws IOException When windows path is longer than 258 characters
      */
@@ -479,11 +481,11 @@ class Filesystem
     /**
      * Creates a temporary file with support for custom stream wrappers.
      *
-     * @param string $dir    The directory where the temporary filename will be created.
-     * @param string $prefix The prefix of the generated temporary filename.
-     *                       Note: Windows uses only the first three characters of prefix.
+     * @param string $dir    The directory where the temporary filename will be created
+     * @param string $prefix The prefix of the generated temporary filename
+     *                       Note: Windows uses only the first three characters of prefix
      *
-     * @return string The new temporary filename (with path), or throw an exception on failure.
+     * @return string The new temporary filename (with path), or throw an exception on failure
      */
     public function tempnam($dir, $prefix)
     {
@@ -491,7 +493,7 @@ class Filesystem
 
         // If no scheme or scheme is "file" or "gs" (Google Cloud) create temp file in local filesystem
         if (null === $scheme || 'file' === $scheme || 'gs' === $scheme) {
-            $tmpFile = tempnam($hierarchy, $prefix);
+            $tmpFile = @tempnam($hierarchy, $prefix);
 
             // If tempnam failed or no scheme return the filename otherwise prepend the scheme
             if (false !== $tmpFile) {
@@ -531,8 +533,8 @@ class Filesystem
     /**
      * Atomically dumps content into a file.
      *
-     * @param string $filename The file to be written to.
-     * @param string $content  The data to write into the file.
+     * @param string $filename The file to be written to
+     * @param string $content  The data to write into the file
      *
      * @throws IOException If the file cannot be written to.
      */
@@ -554,8 +556,7 @@ class Filesystem
             throw new IOException(sprintf('Failed to write file "%s".', $filename), 0, null, $filename);
         }
 
-        // Ignore for filesystems that do not support umask
-        @chmod($tmpFile, 0666);
+        @chmod($tmpFile, 0666 & ~umask());
         $this->rename($tmpFile, $filename, true);
     }
 
@@ -576,7 +577,7 @@ class Filesystem
     /**
      * Gets a 2-tuple of scheme (may be null) and hierarchical part of a filename (e.g. file:///tmp -> array(file, tmp)).
      *
-     * @param string $filename The filename to be parsed.
+     * @param string $filename The filename to be parsed
      *
      * @return array The filename scheme and hierarchical part
      */

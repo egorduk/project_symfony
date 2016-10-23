@@ -58,6 +58,7 @@ class ComposerStaticInit5b9d1cffa82704c6a96e56bbdc329bbd
         ),
         'P' => 
         array (
+            'Psr\\Log\\' => 8,
             'Psr\\Cache\\' => 10,
         ),
         'M' => 
@@ -177,6 +178,10 @@ class ComposerStaticInit5b9d1cffa82704c6a96e56bbdc329bbd
         array (
             0 => __DIR__ . '/..' . '/sensio/distribution-bundle',
         ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
         'Psr\\Cache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/cache/src',
@@ -248,10 +253,6 @@ class ComposerStaticInit5b9d1cffa82704c6a96e56bbdc329bbd
         ),
         'P' => 
         array (
-            'Psr\\Log\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/psr/log',
-            ),
             'ProxyManager\\' => 
             array (
                 0 => __DIR__ . '/..' . '/ocramius/proxy-manager/src',

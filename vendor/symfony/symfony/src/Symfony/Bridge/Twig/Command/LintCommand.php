@@ -65,18 +65,19 @@ class LintCommand extends Command
 The <info>%command.name%</info> command lints a template and outputs to STDOUT
 the first encountered syntax error.
 
-You can validate the syntax of a file:
+You can validate the syntax of contents passed from STDIN:
 
-<info>php %command.full_name% filename</info>
+  <info>cat filename | php %command.full_name%</info>
+
+Or the syntax of a file:
+
+  <info>php %command.full_name% filename</info>
 
 Or of a whole directory:
 
-<info>php %command.full_name% dirname</info>
-<info>php %command.full_name% dirname --format=json</info>
+  <info>php %command.full_name% dirname</info>
+  <info>php %command.full_name% dirname --format=json</info>
 
-You can also pass the template contents from STDIN:
-
-<info>cat filename | php %command.full_name%</info>
 EOF
             )
         ;
@@ -104,7 +105,7 @@ EOF
                 $template .= fread(STDIN, 1024);
             }
 
-            return $this->display($input, $output, $io, array($this->validate($twig, $template, uniqid('sf_'))));
+            return $this->display($input, $output, $io, array($this->validate($twig, $template, uniqid('sf_', true))));
         }
 
         $filesInfo = $this->getFilesInfo($twig, $filenames);
@@ -201,7 +202,7 @@ EOF
             }
         });
 
-        $output->writeln(json_encode($filesInfo, JSON_PRETTY_PRINT));
+        $output->writeln(json_encode($filesInfo, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return min($errors, 1);
     }

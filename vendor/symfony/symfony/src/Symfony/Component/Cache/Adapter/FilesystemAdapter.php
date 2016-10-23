@@ -60,7 +60,7 @@ class FilesystemAdapter extends AbstractAdapter
 
         foreach ($ids as $id) {
             $file = $this->getFile($id);
-            if (!$h = @fopen($file, 'rb')) {
+            if (!file_exists($file) || !$h = @fopen($file, 'rb')) {
                 continue;
             }
             if ($now >= (int) $expiresAt = fgets($h)) {
@@ -73,7 +73,7 @@ class FilesystemAdapter extends AbstractAdapter
                 $value = stream_get_contents($h);
                 fclose($h);
                 if ($i === $id) {
-                    $values[$id] = unserialize($value);
+                    $values[$id] = parent::unserialize($value);
                 }
             }
         }
@@ -126,7 +126,7 @@ class FilesystemAdapter extends AbstractAdapter
     protected function doSave(array $values, $lifetime)
     {
         $ok = true;
-        $expiresAt = $lifetime ? time() + $lifetime : PHP_INT_MAX;
+        $expiresAt = time() + ($lifetime ?: 31557600); // 31557600s = 1 year
         $tmp = $this->directory.uniqid('', true);
 
         foreach ($values as $id => $value) {

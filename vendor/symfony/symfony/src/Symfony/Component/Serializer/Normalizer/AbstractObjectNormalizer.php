@@ -56,7 +56,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
     public function normalize($object, $format = null, array $context = array())
     {
         if (!isset($context['cache_key'])) {
-            $context['cache_key'] = $this->getCacheKey($context);
+            $context['cache_key'] = $this->getCacheKey($format, $context);
         }
 
         if ($this->isCircularReference($object, $context)) {
@@ -169,7 +169,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
     public function denormalize($data, $class, $format = null, array $context = array())
     {
         if (!isset($context['cache_key'])) {
-            $context['cache_key'] = $this->getCacheKey($context);
+            $context['cache_key'] = $this->getCacheKey($format, $context);
         }
         $allowedAttributes = $this->getAllowedAttributes($class, $context, true);
         $normalizedData = $this->prepareForDenormalization($data);
@@ -238,7 +238,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      */
     private function validateAndDenormalize($currentClass, $attribute, $data, $format, array $context)
     {
-        if (null === $this->propertyTypeExtractor || null === $types = $this->propertyTypeExtractor->getTypes($currentClass, $attribute)){
+        if (null === $this->propertyTypeExtractor || null === $types = $this->propertyTypeExtractor->getTypes($currentClass, $attribute)) {
             return $data;
         }
 
@@ -248,8 +248,18 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
                 return;
             }
 
-            $builtinType = $type->getBuiltinType();
-            $class = $type->getClassName();
+            if ($type->isCollection() && null !== ($collectionValueType = $type->getCollectionValueType()) && Type::BUILTIN_TYPE_OBJECT === $collectionValueType->getBuiltinType()) {
+                $builtinType = Type::BUILTIN_TYPE_OBJECT;
+                $class = $collectionValueType->getClassName().'[]';
+
+                if (null !== $collectionKeyType = $type->getCollectionKeyType()) {
+                    $context['key_type'] = $collectionKeyType;
+                }
+            } else {
+                $builtinType = $type->getBuiltinType();
+                $class = $type->getClassName();
+            }
+
             $expectedTypes[Type::BUILTIN_TYPE_OBJECT === $builtinType && $class ? $class : $builtinType] = true;
 
             if (Type::BUILTIN_TYPE_OBJECT === $builtinType) {
@@ -336,14 +346,15 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
     /**
      * Gets the cache key to use.
      *
-     * @param array $context
+     * @param string|null $format
+     * @param array       $context
      *
      * @return bool|string
      */
-    private function getCacheKey(array $context)
+    private function getCacheKey($format, array $context)
     {
         try {
-            return md5(serialize($context));
+            return md5($format.serialize($context));
         } catch (\Exception $exception) {
             // The context cannot be serialized, skip the cache
             return false;
